@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+env/
+
+# Model weights (download separately — too large for GitHub)
+*.pt
+*.pth
+*.onnx
+
+# Debug folders
+debug/
+debug_*/
+DEBUG_*/
+debug_placas/
+debug_recortes/
+tentativas_falhas/
+resultados/
+resultados_visuais/
+resultados_visuais_*/
+
+# Temporary image files in root only (not in subfolders)
+/recorte.jpg
+/carro_python.jpg
+/tentativa_*.jpg
+/teste_*.jpg
+/debug_*.jpg
+/debug_*.png
+
+# Database
+*.db
+
+# XML classifiers
+*.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
