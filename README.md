@@ -20,13 +20,13 @@ A computer vision system for automatic detection and recognition of Brazilian li
 ### Annotated outputs
 
 **Close-range plate (carro1)**
-![carro1](imagens_resultado/carro1_resultado.jpg)
+![carro1](imagens_resultado/carro1_result.jpg)
 
 **Street-level plate (carro2)**
-![carro2](imagens_resultado/carro2_resultado.jpg)
+![carro2](imagens_resultado/carro2_result.jpg)
 
 **Distant plate in complex urban scene (carro3)**
-![carro3](imagens_resultado/carro3_resultado.jpg)
+![carro3](imagens_resultado/carro3_result.jpg)
 
 ---
 
@@ -170,7 +170,7 @@ projeto_placa/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/matheuspaixaodasilva-lab/alpr
+git clone https://github.com/matheuspaixaodasilva-lab/alpr-brazil
 cd alpr
 ```
 
