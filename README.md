@@ -234,12 +234,12 @@ curl -X POST "http://localhost:8000/detect?multiscale=true" \
 **1. Clone the repository**
 ```bash
 git clone https://github.com/matheuspaixaodasilva-lab/alpr-brazil
-cd alpr
+cd alpr-brazil
 ```
 
 **2. Install dependencies**
 ```bash
-pip install ultralytics easyocr opencv-python numpy
+pip install -r requirements.txt
 ```
 
 **3. Add your images to `imagens_teste/`**
