@@ -162,18 +162,62 @@ def crop_plate(image_bgr, bbox):
     return image_bgr[y1:y2, x1:x2]
 
 
+def deskew_plate(crop_bgr):
+    """
+    Detects and corrects the tilt angle of the plate crop using Hough lines.
+    Only corrects if the detected angle is between 1° and 20° (avoids over-correction).
+    """
+    gray  = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 50, 150)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=40,
+                            minLineLength=30, maxLineGap=10)
+    if lines is None:
+        return crop_bgr
+
+    angles = []
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        if x2 - x1 == 0:
+            continue
+        angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
+        # Only consider near-horizontal lines (plate characters are horizontal)
+        if abs(angle) < 25:
+            angles.append(angle)
+
+    if not angles:
+        return crop_bgr
+
+    median_angle = np.median(angles)
+
+    # Skip if angle is negligible or too large (likely noise)
+    if abs(median_angle) < 1.0 or abs(median_angle) > 20.0:
+        return crop_bgr
+
+    h, w = crop_bgr.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, median_angle, 1.0)
+    corrected = cv2.warpAffine(crop_bgr, M, (w, h),
+                               flags=cv2.INTER_CUBIC,
+                               borderMode=cv2.BORDER_REPLICATE)
+    return corrected
+
+
 def preprocess_plate(crop_bgr):
     """
     Prepares the plate crop for OCR:
       1. Removes the Mercosul blue band (top 20%)
-      2. Upscales to at least 400px wide
-      3. Applies sharpening kernel
-      4. Boosts contrast slightly
+      2. Corrects tilt angle (deskewing via Hough lines)
+      3. Upscales to at least 400px wide
+      4. Applies sharpening kernel
+      5. Boosts contrast slightly
     """
     h, w = crop_bgr.shape[:2]
 
     # Remove Mercosul top band
     crop_bgr = crop_bgr[int(h * 0.20):h, :]
+
+    # Correct perspective tilt
+    crop_bgr = deskew_plate(crop_bgr)
 
     # Upscale to minimum readable resolution
     th, tw = crop_bgr.shape[:2]
