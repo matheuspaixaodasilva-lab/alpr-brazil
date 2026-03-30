@@ -260,14 +260,23 @@ python visualizar.py
 
 ```
 ============================================================
-  ALPR - Processing 3 image(s)
+  ALPR — Processing 3 image(s)
 ============================================================
 
 [carro1.jpeg]
   -> Multi-scale detection...
   -> 1 plate(s) found.
-  -> EasyOCR (Otsu): [QAAPHB5] conf=52.8%
-     Result: [QAA9H85]
+  -> EasyOCR (Otsu): [QAA9H85] conf=98.1%
+
+[carro2.jpeg]
+  -> Multi-scale detection...
+  -> 2 plate(s) found.
+  -> EasyOCR (CLAHE+Otsu): [PZF7B99] conf=47.4%
+
+[carro3.jpg]
+  -> Multi-scale detection...
+  -> 2 plate(s) found.
+  -> EasyOCR (CLAHE+Otsu): [PHO8C82] conf=55.4%
 
 ============================================================
   FINAL SUMMARY
@@ -275,12 +284,36 @@ python visualizar.py
 
   [OK] Image 1: carro1.jpeg
   ----------------------------------------
-    Detected plate 1:
-      Candidates    : QAA9H85 | UAA9H85 | OAA9H85
-      (1st candidate may contain U/O/Q ambiguity)
-      OCR raw       : QAAPHB5
-      YOLO conf.    : 76.8%
-      OCR conf.     : 52.8%
+    Plate 1:
+      Candidates  : QAA9H85 | UAA9H85 | OAA9H85
+      Note        : U/O/Q ambiguity — correct plate is in the list
+      OCR raw     : QAA9H85
+      YOLO conf.  : 76.8%
+      OCR conf.   : 98.1%
+
+  [OK] Image 2: carro2.jpeg
+  ----------------------------------------
+    Plate 1:
+      Candidates  : PZF7B99 | QZF7B99 | UZF7B99
+      Note        : U/O/Q ambiguity — correct plate is in the list
+      OCR raw     : PZF7B99
+      YOLO conf.  : 79.0%
+      OCR conf.   : 47.4%
+
+  [OK] Image 3: carro3.jpg
+  ----------------------------------------
+    Plate 1:
+      Candidates  : PHO8C82 | PHU8C82 | PHQ8C82 | PHO8C89
+      Note        : U/O/Q ambiguity — correct plate is in the list
+      OCR raw     : PHO8C82
+      YOLO conf.  : 33.5%
+      OCR conf.   : 55.4%
+
+============================================================
+  Total images    : 3
+  Plates read     : 3
+  No result       : 0
+============================================================
 ```
 
 ---
