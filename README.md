@@ -1,6 +1,6 @@
 # 🚗 ALPR — Automatic License Plate Recognition
 
-A computer vision system for automatic detection and recognition of Brazilian license plates, built with YOLOv8, OpenCV, and EasyOCR.
+A computer vision system for automatic detection and recognition of Brazilian license plates, built with YOLOv8, OpenCV, EasyOCR and served via a FastAPI REST endpoint.
 
 **Author:** Matheus Paixão da Silva  
 **GitHub:** [matheuspaixaodasilva-lab](https://github.com/matheuspaixaodasilva-lab)
@@ -52,7 +52,8 @@ Input Image
              ▼
 ┌─────────────────────────┐
 │   Pre-processing         │  • Remove Mercosul top band (20%)
-│   (OpenCV)               │  • Upscale to min 400px width
+│   (OpenCV)               │  • Deskewing via Hough lines (corrects tilt)
+│                          │  • Upscale to min 400px width
 │                          │  • Sharpening kernel
 │                          │  • Contrast enhancement
 └────────────┬────────────┘
@@ -73,6 +74,14 @@ Input Image
 │   + Validation           │  • Visual similarity substitution (B↔8, S↔5, Z↔2...)
 │                          │  • Pattern matching (regex)
 │                          │  • Multi-candidate generation
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│   REST API               │  FastAPI endpoint — POST /detect
+│   (FastAPI)              │  • Standard mode  (~3.5s, close-range plates)
+│                          │  • Multiscale mode (~9.5s, distant plates)
+│                          │  • Returns JSON with candidates + confidence
 └────────────┬────────────┘
              │
              ▼
@@ -141,9 +150,11 @@ Plates photographed at angles greater than ~40° or from distances greater than 
 |------|---------|---------|
 | Python | 3.13 | Core language |
 | YOLOv8 (Ultralytics) | 8.x | Plate detection |
-| OpenCV | 4.x | Image pre-processing |
+| OpenCV | 4.x | Image pre-processing + deskewing |
 | EasyOCR | 1.7 | Character recognition |
 | NumPy | 2.x | Array operations |
+| FastAPI | 0.110+ | REST API |
+| Uvicorn | 0.27+ | ASGI server |
 
 ---
 
@@ -153,19 +164,71 @@ Plates photographed at angles greater than ~40° or from distances greater than 
 projeto_placa/
 ├── projeto_placa.py        # Main ALPR pipeline
 ├── visualizar.py           # Annotated image generator
+├── api.py                  # FastAPI REST endpoint
+├── requirements.txt        # Python dependencies
 ├── license_plate_detector.pt  # YOLOv8 trained model
 ├── imagens_teste/          # Input images
 │   ├── carro1.jpeg
 │   ├── carro2.jpeg
 │   └── carro3.jpg
-└── resultados_visuais_*/   # Output folders (timestamped)
-    ├── carro1_resultado.jpg
-    ├── carro1_placa1.jpg
-    └── ...
+├── imagens_resultado/      # Annotated output images
+│   ├── carro1_result.jpg
+│   ├── carro2_result.jpg
+│   └── carro3_result.jpg
+└── resultados_visuais_*/   # Timestamped output folders
 ```
+
 
 ---
 
+## 🌐 REST API
+
+The system is also available as a REST API built with FastAPI.
+
+**Start the server:**
+```bash
+uvicorn api:app --reload
+```
+
+**Interactive docs:** `http://localhost:8000/docs`
+
+**Endpoint: `POST /detect`**
+
+```bash
+# Standard mode (faster, close-range plates)
+curl -X POST "http://localhost:8000/detect" \
+  -F "file=@imagens_teste/carro1.jpeg"
+
+# Multiscale mode (slower, detects distant plates)
+curl -X POST "http://localhost:8000/detect?multiscale=true" \
+  -F "file=@imagens_teste/carro3.jpg"
+```
+
+**Response:**
+```json
+{
+  "plates": [
+    {
+      "plate": "QAA9H85",
+      "candidates": ["QAA9H85", "UAA9H85", "OAA9H85"],
+      "ocr_raw": "QAA9H85",
+      "confidence": { "yolo": 0.7679, "ocr": 0.9808 },
+      "bbox": { "x1": 785, "y1": 1167, "x2": 933, "y2": 1251 }
+    }
+  ],
+  "total_detected": 1,
+  "processing_time_ms": 3605.8,
+  "mode": "standard",
+  "image_size": { "width": 960, "height": 1280 }
+}
+```
+
+| Mode | Avg. Time (CPU) | Best for |
+|------|----------------|---------|
+| `multiscale=false` | ~3.5s | Close-range plates, fixed cameras |
+| `multiscale=true`  | ~9.5s | Distant plates, urban scenes |
+
+---
 ## 🚀 Setup
 
 **1. Clone the repository**
